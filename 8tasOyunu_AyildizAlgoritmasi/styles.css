@@ -1,0 +1,36 @@
+.container {
+    text-align: center;
+}
+
+#board {
+    margin: 20px auto;
+}
+
+#stats {
+    margin-top: 50px;
+}
+
+#statistics {
+    border: 1px solid #ccc;
+    padding: 10px;
+    max-width: 300px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+.cell {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    cursor: pointer;
+}
+
+.cell.black {
+    background-color: #000;
+}
+
+.cell.selected {
+    background-color: yellow;
+}
