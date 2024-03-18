@@ -48,7 +48,6 @@ $(document).ready(function () {
         }
     }
 
-
     // Geçerli bir hareket mi kontrol et
     function isValidMove(clickedIndex) {
         var emptyRow = Math.floor(emptyIndex / 3);
@@ -83,6 +82,7 @@ $(document).ready(function () {
         }
         emptyIndex = array.indexOf('');
     }
+
     function calculateHeuristic(state) {
         var misplaced = 0;
         for (var i = 0; i < state.length; i++) {
@@ -92,8 +92,8 @@ $(document).ready(function () {
         }
         return misplaced;
     }
-    // A* algoritması ile 8 eightstone problemi çözümü
 
+    // A* algoritması ile 8 eightstone problemi çözümü
     function solveeightstone(eightstone) {
         // Hedef durumu belirle
         var goalState = [1, 2, 3, 4, 5, 6, 7, 8, ''];
@@ -164,10 +164,6 @@ $(document).ready(function () {
         return null;
     }
 
-
-
-
-
     // Komşu düğümleri oluştur
     function generateNeighbors(node) {
         var neighbors = [];
@@ -205,7 +201,6 @@ $(document).ready(function () {
         return neighbors;
     }
 
-
     // Düğüm listesinde belirli bir durumu içeriyor mu kontrol et
     function containsNode(nodeList, state) {
         return nodeList.some(function (node) {
@@ -220,13 +215,27 @@ $(document).ready(function () {
         }
 
         if (solutionTree) {
-            solutionText += "<br>Çözüm Ağacı:<br>";
+            solutionText += "<div class='solution-tree'><h2>Çözüm Ağacı:</h2><div class='node-details'><table><tr><th>Adım</th><th>Durum</th><th>Gerçek Maliyet</th><th>Sezgisel Maliyet</th><th>Toplam Maliyet</th></tr>";
             solutionTree.forEach(function (node, index) {
-                solutionText += "Adım " + index + ": Durum: " + node.state + ", Gerçek Maliyet: " + node.cost + ", Sezgisel Maliyet: " + node.heuristic + ", Toplam Maliyet: " + (node.cost + node.heuristic) + "<br>";
+                solutionText += "<tr><td>" + index + "</td><td>" + renderBoardState(node.state) + "</td><td>" + node.cost + "</td><td>" + node.heuristic + "</td><td>" + (node.cost + node.heuristic) + "</td></tr>";
             });
+            solutionText += "</table></div></div>";
         }
 
         $('#solutionInfo').html(solutionText);
     }
-});
 
+    function renderBoardState(state) {
+        var boardHTML = '<table>';
+        for (var i = 0; i < 3; i++) {
+            boardHTML += '<tr>';
+            for (var j = 0; j < 3; j++) {
+                var index = i * 3 + j;
+                boardHTML += '<td>' + (state[index] !== '' ? state[index] : ' ') + '</td>';
+            }
+            boardHTML += '</tr>';
+        }
+        boardHTML += '</table>';
+        return boardHTML;
+    }
+});
