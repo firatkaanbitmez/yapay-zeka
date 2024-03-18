@@ -1,7 +1,9 @@
 $(document).ready(function () {
-    var board = $('#puzzleBoard');
+    var board = $('#eightstoneBoard');
     var tiles = [];
     var emptyIndex = 8;
+    var openList = []; // openList değişkenini global olarak tanımla
+    var closedList = []; // closedList değişkenini global olarak tanımla
 
     // Oyun tahtasını oluştur
     for (var i = 0; i < 9; i++) {
@@ -23,9 +25,9 @@ $(document).ready(function () {
 
     // A* Algoritması ile çözme butonuna tıklama olayını ekle
     $('#solveButton').click(function () {
-        var solution = solvePuzzle(numbers);
+        var solution = solveeightstone(numbers);
         if (solution) {
-            displaySolutionInfo(solution);
+            displaySolutionInfo(solution.solution, solution.realCost, solution.heuristicCost, solution.realCost + solution.heuristicCost, openList.concat(closedList));
         } else {
             alert("Bu bulmaca çözülemez.");
         }
@@ -45,6 +47,7 @@ $(document).ready(function () {
             }
         }
     }
+
 
     // Geçerli bir hareket mi kontrol et
     function isValidMove(clickedIndex) {
@@ -80,24 +83,33 @@ $(document).ready(function () {
         }
         emptyIndex = array.indexOf('');
     }
+    function calculateHeuristic(state) {
+        var misplaced = 0;
+        for (var i = 0; i < state.length; i++) {
+            if (state[i] !== '' && state[i] !== i + 1) {
+                misplaced++;
+            }
+        }
+        return misplaced;
+    }
+    // A* algoritması ile 8 eightstone problemi çözümü
 
-    // A* algoritması ile 8 puzzle problemi çözümü
-    function solvePuzzle(puzzle) {
+    function solveeightstone(eightstone) {
         // Hedef durumu belirle
         var goalState = [1, 2, 3, 4, 5, 6, 7, 8, ''];
 
         // Başlangıç düğümünü oluştur
         var startNode = {
-            state: puzzle,
+            state: eightstone,
             parent: null,
             move: null,
             cost: 0,
-            heuristic: calculateHeuristic(puzzle)
+            heuristic: calculateHeuristic(eightstone)
         };
 
         // Açık listeyi başlangıç düğümü ile başlat
-        var openList = [startNode];
-        var closedList = [];
+        openList = [startNode]; // global openList değişkenini güncelle
+        closedList = []; // global closedList değişkenini güncelle
 
         while (openList.length > 0) {
             // En iyi düğümü seç (en düşük f + h maliyetli)
@@ -114,11 +126,16 @@ $(document).ready(function () {
             if (currentNode.state.toString() === goalState.toString()) {
                 var solution = [];
                 var current = currentNode;
+                var realCost = 0;
                 while (current !== null) {
-                    solution.unshift(current.move);
+                    if (current.move) {
+                        solution.unshift(current.move);
+                        realCost++;
+                    }
                     current = current.parent;
                 }
-                return solution.slice(1); // Başlangıç düğümünü atla
+                var heuristicCost = currentNode.heuristic;
+                return { solution: solution, realCost: realCost, heuristicCost: heuristicCost };
             }
 
             // Açık listeden çıkar, kapalı listeye ekle
@@ -129,11 +146,11 @@ $(document).ready(function () {
             var neighbors = generateNeighbors(currentNode);
             neighbors.forEach(function (neighbor) {
                 if (!containsNode(closedList, neighbor.state)) {
-                    var gScore = currentNode.cost + 1; // Maliyet güncelleme
+                    var gScore = currentNode.cost + 1; // Gerçek maliyet güncelleme
                     var inOpenList = containsNode(openList, neighbor.state);
                     if (!inOpenList || gScore < neighbor.cost) {
                         neighbor.cost = gScore;
-                        neighbor.heuristic = calculateHeuristic(neighbor.state);
+                        neighbor.heuristic = calculateHeuristic(neighbor.state); // Sezgisel maliyet
                         neighbor.parent = currentNode;
                         if (!inOpenList) {
                             openList.push(neighbor);
@@ -147,21 +164,9 @@ $(document).ready(function () {
         return null;
     }
 
-    // Hurestic fonksiyonunu hesapla (Manhattan mesafesi)
-    function calculateHeuristic(state) {
-        var heuristic = 0;
-        state.forEach(function (value, index) {
-            if (value !== '') {
-                var goalIndex = value - 1;
-                var rowIndex = Math.floor(index / 3);
-                var colIndex = index % 3;
-                var goalRow = Math.floor(goalIndex / 3);
-                var goalCol = goalIndex % 3;
-                heuristic += Math.abs(rowIndex - goalRow) + Math.abs(colIndex - goalCol);
-            }
-        });
-        return heuristic;
-    }
+
+
+
 
     // Komşu düğümleri oluştur
     function generateNeighbors(node) {
@@ -171,10 +176,10 @@ $(document).ready(function () {
         var emptyCol = emptyIndex % 3;
 
         var moves = [
-            { row: -1, col: 0, action: 'Down' },
-            { row: 1, col: 0, action: 'Up' },
-            { row: 0, col: -1, action: 'Right' },
-            { row: 0, col: 1, action: 'Left' }
+            { row: -1, col: 0, action: 'Boş Kutucuk Yukarı' },
+            { row: 1, col: 0, action: 'Boş Kutucuk Aşağı' },
+            { row: 0, col: -1, action: 'Boş Kutucuk Sola' },
+            { row: 0, col: 1, action: 'Boş Kutucuk Sağa' }
         ];
 
         moves.forEach(function (move) {
@@ -185,18 +190,21 @@ $(document).ready(function () {
                 var newIndex = newRow * 3 + newCol;
                 newState[emptyIndex] = newState[newIndex];
                 newState[newIndex] = '';
+                // Hesaplanan heuristic değerini ayarla
+                var newHeuristic = calculateHeuristic(newState);
                 neighbors.push({
                     state: newState,
                     parent: node,
                     move: move.action,
                     cost: 0,
-                    heuristic: 0
+                    heuristic: newHeuristic // Doğru hesaplanan heuristic değeri
                 });
             }
         });
 
         return neighbors;
     }
+
 
     // Düğüm listesinde belirli bir durumu içeriyor mu kontrol et
     function containsNode(nodeList, state) {
@@ -205,13 +213,20 @@ $(document).ready(function () {
         });
     }
 
-
-    // Çözüm bilgisini ekrana göster
-    function displaySolutionInfo(solution) {
+    function displaySolutionInfo(solution, realCost, heuristicCost, totalCost, solutionTree) {
         var solutionText = "Çözüm Adımları:<br>";
         for (var i = 0; i < solution.length; i++) {
-            solutionText += (i + 1) + ". Adım: " + solution[i] + "<br>";
+            solutionText += solution[i] + "<br>";
         }
+
+        if (solutionTree) {
+            solutionText += "<br>Çözüm Ağacı:<br>";
+            solutionTree.forEach(function (node, index) {
+                solutionText += "Adım " + index + ": Durum: " + node.state + ", Gerçek Maliyet: " + node.cost + ", Sezgisel Maliyet: " + node.heuristic + ", Toplam Maliyet: " + (node.cost + node.heuristic) + "<br>";
+            });
+        }
+
         $('#solutionInfo').html(solutionText);
     }
 });
+

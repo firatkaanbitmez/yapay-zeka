@@ -4,7 +4,7 @@
     align-items: center;
 }
 
-.puzzle-board {
+.eightstone-board {
     display: grid;
     grid-template-columns: repeat(3, 100px);
     grid-gap: 5px;
