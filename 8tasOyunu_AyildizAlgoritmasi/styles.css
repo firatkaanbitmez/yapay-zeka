@@ -9,12 +9,9 @@
     grid-template-columns: repeat(3, 100px);
     grid-gap: 5px;
     background-color: #f8f9fa;
-    /* Arka plan rengi */
     padding: 10px;
     border-radius: 10px;
-    /* Kenarları yuvarlama */
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    /* Gölge efekti */
 }
 
 .tile {
@@ -28,7 +25,6 @@
     font-size: 24px;
     cursor: pointer;
     border-radius: 5px;
-    /* Kenarları yuvarlama */
 }
 
 .tile:hover {
@@ -38,5 +34,4 @@
 button {
     display: block;
     margin: 20px auto;
-    /* Butonun altındaki boşluğu artır */
 }
