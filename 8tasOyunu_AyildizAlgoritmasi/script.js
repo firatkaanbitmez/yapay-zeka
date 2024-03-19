@@ -21,6 +21,7 @@ $(document).ready(function () {
     $('#shuffleButton').click(function () {
         shuffle(numbers);
         renderBoard();
+        $('#solutionInfo').html('');
     });
 
     // A* Algoritması ile çözme butonuna tıklama olayını ekle
