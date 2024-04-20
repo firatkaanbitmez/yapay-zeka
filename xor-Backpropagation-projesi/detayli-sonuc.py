@@ -81,38 +81,42 @@ class SinirAgi:
         self.bias_gizli += np.sum(gizli_delta, axis=0) * ogrenme_oranı
         print(f"Güncellenmiş gizli biası: {self.bias_gizli}")
 
-# XOR veri kümesi
-inputs = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
-hedefler = np.array([[0], [1], [1], [0]])
+def main():
+    # XOR veri kümesi
+    inputs = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+    hedefler = np.array([[0], [1], [1], [0]])
 
-# 2 giriş nöronu, 2 gizli nöron, ve 1 çıkış nöronu olan bir sinir ağı oluştur
-giris_boyutu = 2
-gizli_boyut = 2
-cikis_boyutu = 1
-ogrenme_oranı = 0.1
+    # 2 giriş nöronu, 2 gizli nöron, ve 1 çıkış nöronu olan bir sinir ağı oluştur
+    giris_boyutu = 2
+    gizli_boyut = 2
+    cikis_boyutu = 1
+    ogrenme_oranı = 0.5
 
-sag = SinirAgi(giris_boyutu, gizli_boyut, cikis_boyutu)
+    sag = SinirAgi(giris_boyutu, gizli_boyut, cikis_boyutu)
 
-# Ağı 10,000 epoch boyunca eğit
-epoch_sayısı = 1
-for epoch in range(epoch_sayısı):
-    sag.geriye_yayılım(inputs, hedefler, ogrenme_oranı)
-    if epoch % 1000 == 0:
-        # Her 1000 epoch'ta kaybı yazdır
-        print(f"Epoch {epoch}: Kayıp = {np.mean(np.square(hedefler - sag.ileri(inputs)))}")
+    # Ağı 10,000 epoch boyunca eğit
+    epoch_sayısı = 1
+    for epoch in range(epoch_sayısı):
+        sag.geriye_yayılım(inputs, hedefler, ogrenme_oranı)
+        if epoch % 1000 == 0:
+            # Her 1000 epoch'ta kaybı yazdır
+            print(f"Epoch {epoch}: Kayıp = {np.mean(np.square(hedefler - sag.ileri(inputs)))}")
 
-# Ağı test et
-while True:
-    try:
-        # Kullanıcıdan giriş al
-        girdi_verileri = input("XOR için iki giriş değeri girin (0 veya 1, virgülle ayrılmış): ")
-        girdi_verileri = [int(x) for x in girdi_verileri.split(",")]
-        if len(girdi_verileri)!= 2 or not all(0 <= x <= 1 for x in girdi_verileri):
-            raise ValueError
-        girdi_verileri = np.array(girdi_verileri)
-        
-        # Eğitilmiş ağı kullanarak tahmin yap
-        tahmin = sag.ileri(girdi_verileri)[0]
-        print(f"Tahmin: {tahmin}")
-    except ValueError:
-        print("Geçersiz giriş! Lütfen sadece 0 veya 1 girin, virgülle ayrılmış.")  
+    # Ağı test et
+    while True:
+        try:
+            # Kullanıcıdan giriş al
+            girdi_verileri = input("XOR için iki giriş değeri girin (0 veya 1, virgülle ayrılmış): ")
+            girdi_verileri = [int(x) for x in girdi_verileri.split(",")]
+            if len(girdi_verileri)!= 2 or not all(0 <= x <= 1 for x in girdi_verileri):
+                raise ValueError
+            girdi_verileri = np.array(girdi_verileri)
+            
+            # Eğitilmiş ağı kullanarak tahmin yap
+            tahmin = sag.ileri(girdi_verileri)[0]
+            print(f"Tahmin: {tahmin}")
+        except ValueError:
+            print("Geçersiz giriş! Lütfen sadece 0 veya 1 girin, virgülle ayrılmış.")  
+
+if __name__ == "__main__":
+    main()
