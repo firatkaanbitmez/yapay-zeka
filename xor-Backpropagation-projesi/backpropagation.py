@@ -13,7 +13,7 @@ def sigmoid_turev(x):
         print(f"{x} için sigmoid türevi hesaplanıyor")  
     return x * (1 - x)  
 
-# Sinir Ağı
+# 
 class SinirAgi:
     def __init__(self, giris_boyutu, gizli_boyut, cikis_boyutu):
         print(f"Giriş: {giris_boyutu} nöron, Gizli: {gizli_boyut} nöron, Çıkış: {cikis_boyutu} nöron")  # Giriş, gizli ve çıkış nöron sayıları 
