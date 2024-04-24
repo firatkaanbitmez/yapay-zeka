@@ -1,26 +1,25 @@
-from matplotlib import pyplot as plt  # Matplotlib kütüphanesinden pyplot modülünü içe aktarır
-import numpy as np  # NumPy kütüphanesini içe aktarır ve kısaltma olarak np kullanır
+from matplotlib import pyplot as plt 
+import numpy as np  
 
 # Sigmoid aktivasyon fonksiyonu tanımlanır
 def sigmoid(x):
-    print(f"{x} için sigmoid hesaplanıyor")  # x değeri için sigmoid hesaplanıyor mesajı yazdırılır
-    return 1 / (1 + np.exp(-x))  # Sigmoid fonksiyonu hesaplanır ve sonuç döndürülür
+    print(f"{x} için sigmoid hesaplanıyor") 
+    return 1 / (1 + np.exp(-x))  
 
 # Sigmoid fonksiyonunun türevidir
 def sigmoid_turev(x):
-    print(f"{x} için sigmoid türevi hesaplanıyor")  # x değeri için sigmoid türevi hesaplanıyor mesajı yazdırılır
-    return x * (1 - x)  # Sigmoid fonksiyonunun türevi hesaplanır ve sonuç döndürülür
+    print(f"{x} için sigmoid türevi hesaplanıyor")  
+    return x * (1 - x)  
 
-# Sinir Ağı sınıfı tanımlanır
+# Sinir Ağı
 class SinirAgi:
     def __init__(self, giris_boyutu, gizli_boyut, cikis_boyutu):
-        print(f"Giriş: {giris_boyutu} nöron, Gizli: {gizli_boyut} nöron, Çıkış: {cikis_boyutu} nöron")  # Giriş, gizli ve çıkış nöron sayıları yazdırılır
+        print(f"Giriş: {giris_boyutu} nöron, Gizli: {gizli_boyut} nöron, Çıkış: {cikis_boyutu} nöron")  # Giriş, gizli ve çıkış nöron sayıları 
         # Ağırlıkları ve biasları rastgele başlat
-        self.agirlik_giris_gizli = np.random.uniform(size=(giris_boyutu, gizli_boyut))  # Giriş ve gizli katman arasındaki ağırlıklar rastgele başlatılır
-        self.agirlik_gizli_cikis = np.random.uniform(size=(gizli_boyut, cikis_boyutu))  # Gizli ve çıkış katman arasındaki ağırlıklar rastgele başlatılır
-        
-        self.bias_gizli = np.random.uniform(size=(1, gizli_boyut))  # Gizli katmanın bias değerleri rastgele başlatılır
-        self.bias_cikis = np.random.uniform(size=(1, cikis_boyutu))  # Çıkış katmanının bias değerleri rastgele başlatılır
+        self.agirlik_giris_gizli = np.random.uniform(size=(giris_boyutu, gizli_boyut))  
+        self.agirlik_gizli_cikis = np.random.uniform(size=(gizli_boyut, cikis_boyutu))         
+        self.bias_gizli = np.random.uniform(size=(1, gizli_boyut)) 
+        self.bias_cikis = np.random.uniform(size=(1, cikis_boyutu))  
 
     def ileri(self, inputs):
         print(f"İleri yayılım: {inputs}")  
@@ -58,16 +57,16 @@ class SinirAgi:
         hata = hedefler - cikis_cikislar 
         print(f"Hata: {hata}")  
         
-        # Çıkış katman çıktılarına göre hatanın türemini hesapla
+        # Çıkış katman çıktılarına göre hatanın türevi
         cikis_delta = hata * sigmoid_turev(cikis_cikislar)  
         print(f"Çıkış delta: {cikis_delta}") 
         
-        # Gizli katman çıktıları ile çıkış katman hatası arasındaki hatayı hesapla
+        # Gizli katman çıktıları ile çıkış katman hatası arasındaki hatayı hesaplama
         gizli_hata = np.dot(cikis_delta, self.agirlik_gizli_cikis.T)  
         print(f"Gizli hata: {gizli_hata}")  
         
         # Gizli katman çıktılarına göre hatanın türemini hesapla
-        gizli_delta = gizli_hata * sigmoid_turev(gizli_cikislar)  # Gizli katman çıktılarına göre hatanın türevi hesaplanır
+        gizli_delta = gizli_hata * sigmoid_turev(gizli_cikislar)  
         print(f"Gizli delta: {gizli_delta}")  
         
         # Ağı geriye yayarak ağırlıkları ve biasları güncelle
@@ -91,10 +90,10 @@ def main():
     cikis_boyutu = 1  # Çıkış katmandaki nöron sayısı
     ogrenme_oranı = 0.5  
 
-    # Sinir ağı 
+    # Sinir ağı Eğitimi bilgileri
     sag = SinirAgi(giris_boyutu, gizli_boyut, cikis_boyutu)
 
-    epoch_sayısı = 8000 # Eğitim döngüsü sayısı
+    epoch_sayısı = 2000 
     
     losses = []  # Kayıpları depolamak için boş bir liste oluşturulur
     for epoch in range(epoch_sayısı):
