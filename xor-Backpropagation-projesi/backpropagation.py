@@ -85,9 +85,9 @@ def main():
     inputs = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])  
     hedefler = np.array([[0], [1], [1], [0]])  
 
-    giris_boyutu = 2  # Giriş katmanındaki nöron sayısı
-    gizli_boyut = 2  # Gizli katmandaki nöron sayısı
-    cikis_boyutu = 1  # Çıkış katmandaki nöron sayısı
+    giris_boyutu = 2  
+    gizli_boyut = 2 
+    cikis_boyutu = 1 
     ogrenme_oranı = 0.5  
 
     # Sinir ağı Eğitimi bilgileri
@@ -124,7 +124,7 @@ def main():
             tahmin = sag.ileri(girdi_verileri)[0]  # Ağı ileri yönde çalıştırır ve tahmin yapar
             print(f"Tahmin: {tahmin}")  # Tahmini yazdırır
         except ValueError:
-            print("Geçersiz giriş! Lütfen sadece 0 veya 1 girin, virgülle ayrılmış.") 
+            print("Geçersiz giriş! Lütfen sadece 0,1 gibi girin, virgülle ayrılmış.") 
 
 if __name__ == "__main__":
     main()  
