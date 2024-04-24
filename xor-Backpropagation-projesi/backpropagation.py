@@ -1,14 +1,16 @@
 from matplotlib import pyplot as plt 
 import numpy as np  
-
+degisken=False
 # Sigmoid aktivasyon fonksiyonu tanımlanır
 def sigmoid(x):
-    print(f"{x} için sigmoid hesaplanıyor") 
+    if degisken:
+        print(f"{x} için sigmoid hesaplanıyor") 
     return 1 / (1 + np.exp(-x))  
 
 # Sigmoid fonksiyonunun türevidir
 def sigmoid_turev(x):
-    print(f"{x} için sigmoid türevi hesaplanıyor")  
+    if degisken:
+        print(f"{x} için sigmoid türevi hesaplanıyor")  
     return x * (1 - x)  
 
 # Sinir Ağı
@@ -22,63 +24,57 @@ class SinirAgi:
         self.bias_cikis = np.random.uniform(size=(1, cikis_boyutu))  
 
     def ileri(self, inputs):
-        print(f"İleri yayılım: {inputs}")  
+          
         gizli_girisler = np.dot(inputs, self.agirlik_giris_gizli) + self.bias_gizli  
-        print(f"Gizli katman girişleri: {gizli_girisler}")  
-        
         # Gizli katman çıktılarını sigmoid fonksiyonu kullanarak hesapla
         gizli_cikislar = sigmoid(gizli_girisler)  
-        print(f"Gizli katman çıktıları: {gizli_cikislar}")  
-        
-        
         cikis_girislar = np.dot(gizli_cikislar, self.agirlik_gizli_cikis) + self.bias_cikis  
-        print(f"Çıkış katman girişleri: {cikis_girislar}")  
-        
         # Çıkış katman çıktılarını sigmoid fonksiyonu kullanarak hesapla
-        cikis_cikislar = sigmoid(cikis_girislar)  
-        print(f"Çıkış katman çıktıları: {cikis_cikislar}")  
+        cikis_cikislar = sigmoid(cikis_girislar) 
+        if degisken:
+            
+            print(f"İleri yayılım: {inputs}")
+            print(f"Gizli katman girişleri: {gizli_girisler}")
+            print(f"Gizli katman çıktıları: {gizli_cikislar}")
+            print(f"Çıkış katman girişleri: {cikis_girislar}")  
+            print(f"Çıkış katman çıktıları: {cikis_cikislar}")  
         
         return cikis_cikislar  
 
     def geriye_yayılım(self, inputs, hedefler, ogrenme_oranı):
-        print(f"Geriye yayılım: Giriş {inputs}, Hedefler {hedefler}, Öğrenme Oranı {ogrenme_oranı}") 
         # Ağ üzerinden ileri yayılım yap
         gizli_girisler = np.dot(inputs, self.agirlik_giris_gizli) + self.bias_gizli  
-        print(f"Gizli katman girişleri: {gizli_girisler}")  
         gizli_cikislar = sigmoid(gizli_girisler)  
-        print(f"Gizli katman çıktıları: {gizli_cikislar}")  
-        
         cikis_girislar = np.dot(gizli_cikislar, self.agirlik_gizli_cikis) + self.bias_cikis  
-        print(f"Çıkış katman girişleri: {cikis_girislar}") 
         cikis_cikislar = sigmoid(cikis_girislar)  
-        print(f"Çıkış katman çıktıları: {cikis_cikislar}") 
-        
         # Tahmin edilen çıktı ile hedef çıktı arasındaki hatayı hesapla
         hata = hedefler - cikis_cikislar 
-        print(f"Hata: {hata}")  
-        
         # Çıkış katman çıktılarına göre hatanın türevi
         cikis_delta = hata * sigmoid_turev(cikis_cikislar)  
-        print(f"Çıkış delta: {cikis_delta}") 
-        
         # Gizli katman çıktıları ile çıkış katman hatası arasındaki hatayı hesaplama
         gizli_hata = np.dot(cikis_delta, self.agirlik_gizli_cikis.T)  
-        print(f"Gizli hata: {gizli_hata}")  
-        
         # Gizli katman çıktılarına göre hatanın türemini hesapla
         gizli_delta = gizli_hata * sigmoid_turev(gizli_cikislar)  
-        print(f"Gizli delta: {gizli_delta}")  
-        
         # Ağı geriye yayarak ağırlıkları ve biasları güncelle
         self.agirlik_gizli_cikis += np.dot(gizli_cikislar.T, cikis_delta) * ogrenme_oranı  
-        print(f"Güncellenmiş gizli-çıkış ağırlıkları: {self.agirlik_gizli_cikis}")  
         self.agirlik_giris_gizli += np.dot(inputs.T, gizli_delta) * ogrenme_oranı  
-        print(f"Güncellenmiş giriş-gizli ağırlıkları: {self.agirlik_giris_gizli}")  
-        
         self.bias_cikis += np.sum(cikis_delta, axis=0) * ogrenme_oranı  
-        print(f"Güncellenmiş çıkış biası: {self.bias_cikis}")  
         self.bias_gizli += np.sum(gizli_delta, axis=0) * ogrenme_oranı  
-        print(f"Güncellenmiş gizli biası: {self.bias_gizli}")  
+        if degisken:
+            print(f"Geriye yayılım: Giriş {inputs}, Hedefler {hedefler}, Öğrenme Oranı {ogrenme_oranı}") 
+            print(f"Gizli katman girişleri: {gizli_girisler}")  
+            print(f"Gizli katman girişleri: {gizli_girisler}")  
+            print(f"Gizli katman çıktıları: {gizli_cikislar}")  
+            print(f"Çıkış katman girişleri: {cikis_girislar}") 
+            print(f"Çıkış katman çıktıları: {cikis_cikislar}") 
+            print(f"Hata: {hata}")  
+            print(f"Çıkış delta: {cikis_delta}") 
+            print(f"Gizli hata: {gizli_hata}") 
+            print(f"Gizli delta: {gizli_delta}") 
+            print(f"Güncellenmiş gizli-çıkış ağırlıkları: {self.agirlik_gizli_cikis}")  
+            print(f"Güncellenmiş giriş-gizli ağırlıkları: {self.agirlik_giris_gizli}")  
+            print(f"Güncellenmiş çıkış biası: {self.bias_cikis}")  
+            print(f"Güncellenmiş gizli biası: {self.bias_gizli}")  
 
 def main():
     # XOR 
