@@ -88,12 +88,12 @@ def main():
     giris_boyutu = 2  
     gizli_boyut = 2 
     cikis_boyutu = 1 
-    ogrenme_oranı = 0.5  
+    ogrenme_oranı = 0.5
 
     # Sinir ağı Eğitimi bilgileri
     sag = SinirAgi(giris_boyutu, gizli_boyut, cikis_boyutu)
 
-    epoch_sayısı = 2000 
+    epoch_sayısı = 100
     
     losses = []  # Kayıpları depolamak için boş bir liste oluşturulur
     for epoch in range(epoch_sayısı):
@@ -114,7 +114,7 @@ def main():
     while True:  
         try:
             
-            girdi_verileri = input("XOR için iki giriş değeri girin (0 veya 1, virgülle ayrılmış): ")
+            girdi_verileri = input("XOR için iki giriş değeri girin (0,1 virgülle ayrılmış): ")
             girdi_verileri = [int(x) for x in girdi_verileri.split(",")]  
             if len(girdi_verileri)!= 2 or not all(0 <= x <= 1 for x in girdi_verileri): 
                 raise ValueError  
