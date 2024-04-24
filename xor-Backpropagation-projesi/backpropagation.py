@@ -96,7 +96,7 @@ def main():
         sag.geriye_yayılım(inputs, hedefler, ogrenme_oranı)  # Geriye yayılım gerçekleştirilir
         loss = np.mean(np.square(hedefler - sag.ileri(inputs)))  # Kayıp hesaplanır
         losses.append(loss)  # Kayıp listeye eklenir
-        if epoch % 10 == 0:
+        if epoch % 100 == 0:
             print(f"Epoch {epoch}: Kayıp = {loss}")  # Her 10 epoch'ta bir kayıp yazdırılır
 
     # Kaybı görselleştirir
