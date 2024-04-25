@@ -106,21 +106,20 @@ def main():
     plt.title('Eğitim Kaybı')  
     plt.show()  
 
-    # Ağ test
-    while True:  
+    while True:
         try:
-            
             girdi_verileri = input("XOR için iki giriş değeri girin (0,1 virgülle ayrılmış): ")
-            girdi_verileri = [int(x) for x in girdi_verileri.split(",")]  
-            if len(girdi_verileri)!= 2 or not all(0 <= x <= 1 for x in girdi_verileri): 
-                raise ValueError  
-            girdi_verileri = np.array(girdi_verileri)  # Girişler NumPy dizisine dönüştürülür
-            
+            girdi_verileri = [x.strip() for x in girdi_verileri.split(",")]  # String değerleri doğrudan al
+            if len(girdi_verileri) != 2 or not all('0' <= x <= '1' for x in girdi_verileri):
+                raise ValueError
+            girdi_verileri = np.array(girdi_verileri, dtype=float)  # Girişler NumPy dizisine dönüştürülür
+            if not all(0 <= x <= 1 for x in girdi_verileri):
+                raise ValueError
             # Eğitilmiş ağı kullanarak tahmin yapar
             tahmin = sag.ileri(girdi_verileri)[0]  # Ağı ileri yönde çalıştırır ve tahmin yapar
             print(f"Tahmin: {tahmin}")  # Tahmini yazdırır
         except ValueError:
-            print("Geçersiz giriş! Lütfen sadece 0,1 gibi girin, virgülle ayrılmış.") 
+            print("Geçersiz giriş! Lütfen sadece 0 veya 1 değerleri girin, virgülle ayrılmış.")
 
 if __name__ == "__main__":
     main()  
