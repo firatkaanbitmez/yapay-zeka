@@ -13,5 +13,7 @@ Bu proje, 8 taş oyununu çözmek için A* algoritması kullanarak bir çözüc�
 Projeyi klonlayın ve tarayıcınızda `index.html` dosyasını açarak uygulamayı başlatın:
 
 
-git clone https://github.com/firatkaanbitmez/yapay-zeka/tree/main/8tasOyunu-AyildizAlgoritmasi
-cd 8tasOyunu-AyildizAlgoritmasi
+git clone https://github.com/firatkaanbitmez/yapay-zeka
+
+
+cd ./yapay-zeka/8tasOyunu-AyildizAlgoritmasi
