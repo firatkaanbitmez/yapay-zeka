@@ -89,7 +89,7 @@ def main():
     # Sinir ağı Eğitimi bilgileri
     sag = SinirAgi(giris_boyutu, gizli_boyut, cikis_boyutu)
 
-    epoch_sayısı = 2000
+    epoch_sayısı = 2500
     
     losses = []  # Kayıpları depolamak için boş bir liste oluşturulur
     for epoch in range(epoch_sayısı):
