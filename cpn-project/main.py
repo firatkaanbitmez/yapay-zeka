@@ -1,94 +1,125 @@
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.kernel_ridge import KernelRidge
-from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import mean_squared_error
 
-# Fonksiyon tanımı
-def fonksiyon(x1, x2):
-    return x2 * np.sin(x1) + x1 * np.cos(x2)
+# Parametreler
+def parametreler():
+    num_ornek = 1000
+    test_boyutu = 0.3
+    cluster_radii = [0.05, 0.1, 0.2]
+    girdi_boyutu = 2
+    cikti_boyutu = 1
+    return num_ornek, test_boyutu, cluster_radii, girdi_boyutu, cikti_boyutu
 
-# Veri setini oluştur
-x1 = np.linspace(0, np.pi, 100)
-x2 = np.linspace(0, np.pi, 100)
-X1, X2 = np.meshgrid(x1, x2)
-Y = fonksiyon(X1, X2)
+# Adım 1: Veri setini üret ve normalize et
+def veri_seti_uret(num_ornek=1000):
+    x1 = np.random.uniform(0, np.pi, num_ornek)
+    x2 = np.random.uniform(0, np.pi, num_ornek)
+    Y = x2 * np.sin(x1) + x1 * np.cos(x2)
 
-# Normalizasyon
-X1_normalize = (X1 - np.min(X1)) / (np.max(X1) - np.min(X1))
-X2_normalize = (X2 - np.min(X2)) / (np.max(X2) - np.min(X2))
-Y_normalize = (Y - np.min(Y)) / (np.max(Y) - np.min(Y))
+    # Veriyi (0, 1) aralığında normalize et
+    scaler = MinMaxScaler()
+    veri = np.vstack((x1, x2, Y)).T
+    normalize_veri = scaler.fit_transform(veri)
 
-# Veriyi düzleştir ve DataFrame'e çevir
-veri = np.vstack((X1_normalize.ravel(), X2_normalize.ravel(), Y_normalize.ravel())).T
-df = pd.DataFrame(veri, columns=['x1', 'x2', 'y'])
+    x1_normalize = normalize_veri[:, 0]
+    x2_normalize = normalize_veri[:, 1]
+    Y_normalize = normalize_veri[:, 2]
 
-# Veriyi karıştır
-df = df.sample(frac=1).reset_index(drop=True)
+    return x1_normalize, x2_normalize, Y_normalize
 
-# Veriyi eğitim ve test olarak böl (%70 eğitim, %30 test)
-egitim_veri, test_veri = train_test_split(df, test_size=0.3, random_state=42)
-X_egitim = egitim_veri[['x1', 'x2']].values
-y_egitim = egitim_veri['y'].values
-X_test = test_veri[['x1', 'x2']].values
-y_test = test_veri['y'].values
+# Adım 2: Veriyi eğitim ve test setlerine böl
+def veriyi_bol(x1_normalize, x2_normalize, Y_normalize, test_boyutu=0.3):
+    X = np.vstack((x1_normalize, x2_normalize)).T
+    X_egitim, X_test, Y_egitim, Y_test = train_test_split(X, Y_normalize, test_size=test_boyutu, random_state=42)
+    return X_egitim, X_test, Y_egitim, Y_test
 
-# RBF modeli eğit
-model = KernelRidge(kernel='rbf', gamma=1)
-model.fit(X_egitim, y_egitim)
+# Adım 3: Karşılıklı Yayılma Ağı (CPN) modeli tanımla
+class CPN:
+    def __init__(self, girdi_boyutu, cikti_boyutu, cluster_radius):
+        self.girdi_boyutu = girdi_boyutu
+        self.cikti_boyutu = cikti_boyutu
+        self.cluster_radius = cluster_radius
+        self.kohonen_katmani = []
+        self.grossberg_katmani = []
 
-# Tahminleri yap
-y_tahmin_egitim = model.predict(X_egitim)
-y_tahmin_test = model.predict(X_test)
+    def egit(self, X_egitim, Y_egitim):
+        # Kohonen katmanını eğit
+        for i, x in enumerate(X_egitim):
+            if len(self.kohonen_katmani) == 0:
+                self.kohonen_katmani.append(x)
+                self.grossberg_katmani.append(Y_egitim[i])
+            else:
+                mesafeler = np.linalg.norm(np.array(self.kohonen_katmani) - x, axis=1)
+                if np.min(mesafeler) > self.cluster_radius:
+                    self.kohonen_katmani.append(x)
+                    self.grossberg_katmani.append(Y_egitim[i])
+                else:
+                    kazanan_indeks = np.argmin(mesafeler)
+                    self.kohonen_katmani[kazanan_indeks] = (self.kohonen_katmani[kazanan_indeks] + x) / 2
+                    self.grossberg_katmani[kazanan_indeks] = (self.grossberg_katmani[kazanan_indeks] + Y_egitim[i]) / 2
 
-# Sonuçları grafikte göster
-plt.figure(figsize=(12, 6))
+    def tahmin_et(self, X_test):
+        Y_tahmin = []
+        for x in X_test:
+            mesafeler = np.linalg.norm(np.array(self.kohonen_katmani) - x, axis=1)
+            kazanan_indeks = np.argmin(mesafeler)
+            Y_tahmin.append(self.grossberg_katmani[kazanan_indeks])
+        return np.array(Y_tahmin)
 
-# Eğitim seti
-plt.subplot(1, 2, 1)
-plt.scatter(y_egitim, y_tahmin_egitim, alpha=0.5)
-plt.plot([0, 1], [0, 1], 'r--')
-plt.xlabel('Gerçek')
-plt.ylabel('Tahmin')
-plt.title('Eğitim Seti')
+# Adım 4: Sonuçları görselleştir
+def sonuc_gorsellestir(Y_egitim, Y_egitim_tahmin, Y_test, Y_test_tahmin):
+    plt.figure(figsize=(14, 6))
 
-# Test seti
-plt.subplot(1, 2, 2)
-plt.scatter(y_test, y_tahmin_test, alpha=0.5)
-plt.plot([0, 1], [0, 1], 'r--')
-plt.xlabel('Gerçek')
-plt.ylabel('Tahmin')
-plt.title('Test Seti')
+    plt.subplot(1, 2, 1)
+    plt.scatter(Y_egitim, Y_egitim_tahmin, c='blue', label='Eğitim verisi')
+    plt.plot([0, 1], [0, 1], 'r--')
+    plt.xlabel('Gerçek')
+    plt.ylabel('Tahmin')
+    plt.title('Eğitim Verisi')
+    plt.legend()
 
-plt.show()
+    plt.subplot(1, 2, 2)
+    plt.scatter(Y_test, Y_test_tahmin, c='green', label='Test verisi')
+    plt.plot([0, 1], [0, 1], 'r--')
+    plt.xlabel('Gerçek')
+    plt.ylabel('Tahmin')
+    plt.title('Test Verisi')
+    plt.legend()
 
-# Farklı gamma değerleri için işlemi yinele ve sonuçları raporla
-def egit_ve_degerlendir(gamma_degerleri):
+    plt.tight_layout()
+    plt.show()
+
+# Adım 5: Veri setini üret ve normalize et
+num_ornek, test_boyutu, cluster_radii, girdi_boyutu, cikti_boyutu = parametreler()
+x1_normalize, x2_normalize, Y_normalize = veri_seti_uret(num_ornek)
+
+# Adım 6: Veriyi eğitim ve test setlerine böl
+X_egitim, X_test, Y_egitim, Y_test = veriyi_bol(x1_normalize, x2_normalize, Y_normalize, test_boyutu)
+
+# Adım 7: CPN modelini eğit
+cpn = CPN(girdi_boyutu=girdi_boyutu, cikti_boyutu=cikti_boyutu, cluster_radius=0.1)
+cpn.egit(X_egitim, Y_egitim)
+
+# Adım 8: Tahmin yap ve sonuçları görselleştir
+Y_egitim_tahmin = cpn.tahmin_et(X_egitim)
+Y_test_tahmin = cpn.tahmin_et(X_test)
+sonuc_gorsellestir(Y_egitim, Y_egitim_tahmin, Y_test, Y_test_tahmin)
+
+# Adım 9: Farklı yarıçap ve kural sayıları ile süreci yinele ve sonuç raporu hazırla
+def farkli_parametreler_ile_yinele(cluster_radii):
     sonuclar = []
-    for gamma in gamma_degerleri:
-        model = KernelRidge(kernel='rbf', gamma=gamma)
-        model.fit(X_egitim, y_egitim)
-        y_tahmin_egitim = model.predict(X_egitim)
-        y_tahmin_test = model.predict(X_test)
-        egitim_hatasi = mean_squared_error(y_egitim, y_tahmin_egitim)
-        test_hatasi = mean_squared_error(y_test, y_tahmin_test)
-        sonuclar.append((gamma, egitim_hatasi, test_hatasi))
-    
-    return pd.DataFrame(sonuclar, columns=['Gamma', 'Eğitim Hatası', 'Test Hatası'])
 
-# Test edilecek gamma değerleri
-gamma_degerleri = np.logspace(-2, 2, 10)
-sonuclar_df = egit_ve_degerlendir(gamma_degerleri)
-print(sonuclar_df)
+    for radius in cluster_radii:
+        cpn = CPN(girdi_boyutu=girdi_boyutu, cikti_boyutu=cikti_boyutu, cluster_radius=radius)
+        cpn.egit(X_egitim, Y_egitim)
+        Y_test_tahmin = cpn.tahmin_et(X_test)
+        mse = mean_squared_error(Y_test, Y_test_tahmin)
+        sonuclar.append((radius, mse))
 
-# Sonuçları raporla
-plt.figure(figsize=(10, 5))
-plt.plot(sonuclar_df['Gamma'], sonuclar_df['Eğitim Hatası'], label='Eğitim Hatası', marker='o')
-plt.plot(sonuclar_df['Gamma'], sonuclar_df['Test Hatası'], label='Test Hatası', marker='o')
-plt.xscale('log')
-plt.xlabel('Gamma Değeri')
-plt.ylabel('Hata (MSE)')
-plt.title('Farklı Gamma Değerleri İçin Eğitim ve Test Hataları')
-plt.legend()
-plt.show()
+    for sonuc in sonuclar:
+        print(f"Küme Yarıçapı: {sonuc[0]}, MSE: {sonuc[1]}")
+
+farkli_parametreler_ile_yinele(cluster_radii)
